@@ -158,25 +158,22 @@ NS.ui.RejectRadio = ecui.inherits(
 # 表单使用
 页面
 ```
-<form name="orderListForm">
-    <input name="pageNum" class="ui-hide" />
-    <input name="pageSize" class="ui-hide" />
-    <div
-        ui="ext-data:searchItems*@#searchItemSection"
-        class="search-item-section"
-    ></div>
+<form name="formName">
+    <input name="id"  value="1" />
+    <input name="name" value="张三" />
+    <input name="title" value="标题" />
 </form>
 ```
 js
 ```
 // 获取表单元素及其内容
-document.forms.orderListForm
-// 获取表单里边name属性对应的值
+const form = document.forms.formName;
+// 获取表单里边name属性对应的值  temps对象对应的就是取出来的值的集合
 let temps = {}
-ecui.esr.parseObject(document.forms.orderListForm, temps);
-// 给表单填充默认值
-ecui.ui.BTableListRoute.prototype.resetFormValue(document.forms.orderListForm);
-ecui.esr.fillForm(document.forms.orderListForm, temps);
+ecui.esr.parseObject(form, temps, false); // 该方法的第3个参数 false:表示取值时不校验内容,反之则校验表单内容
+
+// 给表单填充默认值  
+ecui.esr.fillForm(form, temps); // 该方法表示将 temps对象上对应属性的值回填到form中name属性与对象key一致的表单元素上
 ```
 
 # 数据变化通知视图更新
@@ -184,29 +181,23 @@ ecui.esr.fillForm(document.forms.orderListForm, temps);
 ```
 // 关联数据和视图
 <div
-    ui="ext-data:searchItems*@#searchItemSection"
-    class="search-item-section"
+    ui="ext-data:data*@#dataChangeTarget"
 ></div>
+
 // 渲染数据的模板
-<!-- target: searchItemSection -->
-<!-- for: ${searchItems} as ${item} -->
-<!-- if: ${item.isShow} -->
-<!-- use: selectView(item=${item}) -->
-<!-- var: isShowClearBtn = true -->
-<!-- /if -->
-<!-- /for -->
-<!-- if: ${isShowClearBtn} -->
-<!-- <span ui="type:NS.ClearBtn;" class="clear-btn">清空</span> -->
-<!-- /if -->
+<!-- target: dataChangeTarget -->
+// 自己的html结构
 ```
 js
 ```
-const searchItems = []
-ecui.esr.setData('searchItems', searchItems);
+context.data = 'xxx'
+ecui.esr.setData('data', 123)
 ```
 **参数说明**
-* searchItems 数据
-* searchItemSection 渲染数据对应的模版名称
+* 当context上的data被赋值时
+* 通过ecui.esr.setData()方法对data进行重新赋值时
+
+以上的2种方法改变data都会触发dataChangeTarget这个模板重新渲染
 
 # 常用方法
 **获取当前表单中的控件的控件名称**
@@ -223,9 +214,17 @@ ecui.esr.callRoute('routeName', true);
 ```
 **dom元素操作**
 ```
-var indexView = ecui.$(indexnameID);   // 查  框架自带 也可用原生
-ecui.dom.addClass(indexView, 'ui-hide');   // 添加class
-ecui.dom.removeClass(indexView, 'ui-hide'); // 移除class
+// 获取元素
+const el = ecui.$(indexnameID);   // 查  框架自带 也可用原生
+// 添加class
+ecui.dom.addClass(el, 'ui-hide');  
+// 移除class
+ecui.dom.removeClass(indexView, 'ui-hide'); 
+// 判断当前元素是否含有某个class
+ecui.dom.hasClass(indexView, 'ui-hide'); 
+```
+**控件内部创建和注册其他控件**
+```
 // 创建元素
 var closeEl = ecui.dom.create('DIV', {
     innerHTML: '<span class="close-icon"></span>',
@@ -328,12 +327,10 @@ ecui.dialog('delAllocation', {});
 var __Control = this.getMain();
 yiche.findControl(__Control, ecui.ui.Dialog).hide();
 ```
-挂值到上下文
+获取或者修改上下文上的属性(变量)
 ```
 // 存
-ecui.esr.setData('isClick', {
-    materialIdList: Ids
-});
+ecui.esr.setData('isClick', 1234);
 // 取
 ecui.esr.getData('isClick')
 ```
